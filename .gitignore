@@ -1,0 +1,9 @@
+.vscode/
+
+venv/
+__pycache__/
+
+submissions/
+submission-*.csv
+test*.ipynb
+explore.ipynb
