@@ -2,6 +2,7 @@
 
 venv/
 __pycache__/
+*catboost_info/
 
 submissions/
 submission-*.csv
