@@ -89,3 +89,7 @@ def standardize(columns):
     return _standardize
 
 
+def sort_by_time(train_df, predict_df):
+    train_df = train_df.sort_values(['time', 'bs'])
+    predict_df = predict_df.sort_values(['time', 'bs'])
+    return train_df, predict_df
