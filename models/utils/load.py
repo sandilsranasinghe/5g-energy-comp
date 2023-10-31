@@ -18,6 +18,7 @@ def load_data(path):
     to_predict = pd.read_csv(path + "/to_predict.csv")
     to_predict = to_predict.drop(columns=["w"])
     ec_df = pd.read_csv(path + "/ECdata.csv")
+    
     # rename columns to lower case without spaces for convenience
     bs_info = _rename_columns(bs_info)
     cl_data = _rename_columns(cl_data)
