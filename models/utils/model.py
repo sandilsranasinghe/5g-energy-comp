@@ -50,6 +50,46 @@ class ModelEvalWrapper:
 
         return mae, mape, mse
 
+    def analytic_evaluations(self, model, df):
+        logging.info("Error metrics by number of cells in usage")
+
+        # metrics by number of cells in usage
+        df_0 = df[
+            (df["load_cell0"] > 0)
+            & (df["load_cell1"] == 0)
+            & (df["load_cell2"] == 0)
+            & (df["load_cell3"] == 0)
+        ]
+        df_1 = df[
+            (df["load_cell0"] > 0)
+            & (df["load_cell1"] > 0)
+            & (df["load_cell2"] == 0)
+            & (df["load_cell3"] == 0)
+        ]
+        df_2 = df[
+            (df["load_cell0"] > 0)
+            & (df["load_cell1"] > 0)
+            & (df["load_cell2"] > 0)
+            & (df["load_cell3"] == 0)
+        ]
+        df_3 = df[
+            (df["load_cell0"] > 0)
+            & (df["load_cell1"] > 0)
+            & (df["load_cell2"] > 0)
+            & (df["load_cell3"] > 0)
+        ]
+
+        for i, df_i in enumerate([df_0, df_1, df_2, df_3]):
+            # if no data for this number of cells in usage
+            if len(df_i) == 0:
+                logging.info(f"No data for {i} cells in usage")
+                continue
+
+            mae, mape, mse = self.evaluate(model, df_i)
+            logging.info(
+                f"Metrics for {i} cells in usage ({len(df_i)} records): MAE: {mae:.4f}, MAPE: {mape:.4f}, MSE: {mse:.4f}"
+            )
+
     def train_and_eval(self, train_df):
         # seed for reproducibility
         np.random.seed(42)
@@ -63,7 +103,9 @@ class ModelEvalWrapper:
             model = self.model_getter()
             X = train.drop(self.y_col, axis=1)
             y = train[self.y_col]
-            self.model_trainer(model, X, y)
+            X_test = test.drop(self.y_col, axis=1)
+            y_test = test[self.y_col]
+            self.model_trainer(model, X, y, X_test=X_test, y_test=y_test)
 
             train_mae, train_mape, train_mse = self.evaluate(model, train)
             test_mae, test_mape, test_mse = self.evaluate(model, test)
@@ -100,15 +142,57 @@ class ModelEvalWrapper:
             )
         )
         logging.info(
-            "Std mae: {:.4f}, mape: {:.4f}, mse: {:.4f}".format(
+            "Std mae: {:.4f}, mape: {:.4f}, mse: {:.4f}\n".format(
                 np.std(mae), np.std(mape), np.std(mse)
             )
         )
 
+        logging.info("Analytic evaluations for best model")
+        self.analytic_evaluations(self.best_model, train_df)
+
     def compare_predictions_with(self, df, y_comparison):
         y_pred = self.predict(df)
-
+        
         plt.plot(y_pred, y_comparison, "o")
+        plt.title("Overall Current Model Predictions vs. Best Submission Predictions")
         plt.xlabel("y_pred")
         plt.ylabel("y_comparison")
+        plt.show()
+
+        df["y_pred"] = y_pred
+        df["y_comparison"] = y_comparison
+
+        df_0 = df[
+            (df["load_cell0"] > 0)
+            & (df["load_cell1"] == 0)
+            & (df["load_cell2"] == 0)
+            & (df["load_cell3"] == 0)
+        ]
+        df_1 = df[
+            (df["load_cell0"] > 0)
+            & (df["load_cell1"] > 0)
+            & (df["load_cell2"] == 0)
+            & (df["load_cell3"] == 0)
+        ]
+        df_2 = df[
+            (df["load_cell0"] > 0)
+            & (df["load_cell1"] > 0)
+            & (df["load_cell2"] > 0)
+            & (df["load_cell3"] == 0)
+        ]
+        df_3 = df[
+            (df["load_cell0"] > 0)
+            & (df["load_cell1"] > 0)
+            & (df["load_cell2"] > 0)
+            & (df["load_cell3"] > 0)
+        ]
+
+        # 4 subplots 
+        for i, df_i in enumerate([df_0, df_1, df_2, df_3]):
+            plt.subplot(2, 2, i + 1)
+            plt.plot(df_i["y_pred"], df_i["y_comparison"], "o")
+            plt.title(f"{i+1} cells in usage")
+            plt.xlabel("y_pred")
+            plt.ylabel("y_comparison")
+        plt.tight_layout()
         plt.show()

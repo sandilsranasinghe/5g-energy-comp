@@ -88,27 +88,4 @@ def standardize(columns):
 
     return _standardize
 
-def feature_enginning(train1, valid_df, test_df):
 
-    train1['hour'] = train1['time'].dt.hour
-    valid_df['hour'] = valid_df['time'].dt.hour
-    test_df['hour'] = test_df['time'].dt.hour
-
-    train1['split'] = 'train'
-    valid_df['split'] = 'valid'
-    test_df['split'] = 'test'
-
-    df = pd.concat([train1, valid_df, test_df])
-    df['bs_en'] = df['bs'].apply(lambda x: int(x.strip('B_')))
-
-   
-    df = pd.get_dummies(df, columns=['rutype',  'mode', 'hour'])
-
-    df.sort_values(['time', 'bs'], inplace=True)
-
-
-    train1 = df[df['split'] =='train']
-    valid_df = df[df['split'] =='valid']
-    test_df = df[df['split'] =='test']
-
-    return train1, valid_df, test_df

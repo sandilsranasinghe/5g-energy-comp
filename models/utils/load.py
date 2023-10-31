@@ -17,21 +17,17 @@ def load_data(path):
     train_data = pd.read_csv(path + "/ECdata.csv")
     to_predict = pd.read_csv(path + "/to_predict.csv")
     to_predict = to_predict.drop(columns=["w"])
-    ec_df = pd.read_csv(path + "/ECdata.csv")
-    
+
     # rename columns to lower case without spaces for convenience
     bs_info = _rename_columns(bs_info)
     cl_data = _rename_columns(cl_data)
     train_data = _rename_columns(train_data)
     to_predict = _rename_columns(to_predict)
-    ec_df = _rename_columns(ec_df)
 
     # convert time columns to datetime
     train_data["time"] = pd.to_datetime(train_data["time"])
     to_predict["time"] = pd.to_datetime(to_predict["time"])
     cl_data["time"] = pd.to_datetime(cl_data["time"])
-    ec_df['time'] = pd.to_datetime(ec_df['time'])
-
 
     # create a single row for each base station with multiple sets of columns for each cell
     info_df = cl_data.merge(bs_info, on=["bs", "cellname"], how="left")
@@ -67,13 +63,7 @@ def load_data(path):
     train_df = train_data.merge(info_df, on=["time", "bs"], how="left")
     predict_df = to_predict.merge(info_df, on=["time", "bs"], how="left")
 
-    df = info_df.merge(ec_df, on=['time', 'bs'], how='left')
-    df['split'] = df['energy'].isna().apply(lambda x: 'test' if x == True else 'train')
-
-    train_1 = df[df['split'] =='train']
-    test_data = df[df['split'] =='test']
-
-    return train_df, predict_df,train_1, test_data
+    return train_df, predict_df
 
 
 def load_submission(path):
