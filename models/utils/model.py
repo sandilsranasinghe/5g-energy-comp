@@ -196,3 +196,5 @@ class ModelEvalWrapper:
             plt.ylabel("y_comparison")
         plt.tight_layout()
         plt.show()
+
+        df.drop(columns=["y_pred", "y_comparison"], inplace=True)
